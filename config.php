@@ -1,6 +1,7 @@
 <?php
 /*
  * First authored by Brian Cray
+ * Edited by: niklasnx
  * License: http://creativecommons.org/licenses/by/3.0/
  * Contact the author at http://briancray.com/
  */
@@ -13,8 +14,11 @@ define('DB_HOST', 'localhost');
 define('DB_TABLE', 'shortenedurls');
 
 // connect to database
-mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
-mysql_select_db(DB_NAME);
+$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+if ($mysqli->connect_errno) {
+    echo "Failed to connect to MySQL: " . $mysqli->connect_error;
+    exit();
+}
 
 // base location of script (include trailing slash)
 define('BASE_HREF', 'http://' . $_SERVER['HTTP_HOST'] . '/');
@@ -36,3 +40,4 @@ define('CACHE', TRUE);
 
 // if so, where will the cache files be stored? (include trailing slash)
 define('CACHE_DIR', dirname(__FILE__) . '/cache/');
+?>

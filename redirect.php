@@ -1,6 +1,7 @@
 <?php
 /*
  * First authored by Brian Cray
+ * Edited by: niklasnx
  * License: http://creativecommons.org/licenses/by/3.0/
  * Contact the author at http://briancray.com/
  */
@@ -18,10 +19,15 @@ $shortened_id = getIDFromShortenedURL($_GET['url']);
 
 if(CACHE)
 {
-	$long_url = file_get_contents(CACHE_DIR . $shortened_id);
+	$long_url = @file_get_contents(CACHE_DIR . $shortened_id);
 	if(empty($long_url) || !preg_match('|^https?://|', $long_url))
 	{
-		$long_url = mysql_result(mysql_query('SELECT long_url FROM ' . DB_TABLE . ' WHERE id="' . mysql_real_escape_string($shortened_id) . '"'), 0, 0);
+		$stmt = $mysqli->prepare('SELECT long_url FROM ' . DB_TABLE . ' WHERE id=?');
+		$stmt->bind_param('s', $shortened_id);
+		$stmt->execute();
+		$stmt->bind_result($long_url);
+		$stmt->fetch();
+		$stmt->close();
 		@mkdir(CACHE_DIR, 0777);
 		$handle = fopen(CACHE_DIR . $shortened_id, 'w+');
 		fwrite($handle, $long_url);
@@ -30,12 +36,20 @@ if(CACHE)
 }
 else
 {
-	$long_url = mysql_result(mysql_query('SELECT long_url FROM ' . DB_TABLE . ' WHERE id="' . mysql_real_escape_string($shortened_id) . '"'), 0, 0);
+	$stmt = $mysqli->prepare('SELECT long_url FROM ' . DB_TABLE . ' WHERE id=?');
+	$stmt->bind_param('s', $shortened_id);
+	$stmt->execute();
+	$stmt->bind_result($long_url);
+	$stmt->fetch();
+	$stmt->close();
 }
 
 if(TRACK)
 {
-	mysql_query('UPDATE ' . DB_TABLE . ' SET referrals=referrals+1 WHERE id="' . mysql_real_escape_string($shortened_id) . '"');
+	$stmt = $mysqli->prepare('UPDATE ' . DB_TABLE . ' SET referrals=referrals+1 WHERE id=?');
+	$stmt->bind_param('s', $shortened_id);
+	$stmt->execute();
+	$stmt->close();
 }
 
 header('HTTP/1.1 301 Moved Permanently');
@@ -54,3 +68,4 @@ function getIDFromShortenedURL ($string, $base = ALLOWED_CHARS)
 	}
 	return $out;
 }
+?>
