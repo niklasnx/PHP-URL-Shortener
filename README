@@ -1,5 +1,7 @@
 License: http://www.gnu.org/licenses/gpl-2.0.html
 
+Optimized for PHP 8.X - original version by Brian Cray abandoned
+
 Benefits
 
 - Can shorten over 42 billion unique URLs in 6 or less characters (it can do more than 12,000,000 in only 4!)
